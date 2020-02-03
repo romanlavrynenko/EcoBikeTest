@@ -1,17 +1,23 @@
 package userInterface;
 
+import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
 import entities.EBike;
 import entities.EcoBikeEntity;
 import entities.FoldingBike;
 import entities.Speedelec;
 import fileHandler.MyOwnReader;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class ConsoleInterface {
-
 
     private static MyOwnReader reader;
     private EcoBikeEntity ecoBikeEntity;
@@ -21,15 +27,21 @@ public class ConsoleInterface {
         this.reader = reader;
     }
 
-
-    public static ConsoleInterface getConsole(){
-        if (consoleInterface==null){
+    /**
+     * @return entity of ConsoleInterface
+     */
+    public static ConsoleInterface getConsole() {
+        if (consoleInterface == null) {
             consoleInterface = new ConsoleInterface(reader);
-        }
-        else return consoleInterface;
+        } else return consoleInterface;
         return consoleInterface;
     }
-    public void display() {
+
+    /**
+     * Showing all possibles function in System.out
+     * Executing all methods
+     */
+    public void displayMainMenu() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please make your choice:\n" +
                 "1 - Show the entire EcoBike catalog\n" +
@@ -40,36 +52,106 @@ public class ConsoleInterface {
                 "6 – Write to file\n" +
                 "7 – Stop the program\n");
 
-        String string;
-        while (true) {
-
-            string = scanner.nextLine();
-            if (string.equals("1"))
-                displayEcoBikeCatalog();
-
-            if (string.equals("2"))
-                createNewFoldingBike();
-
-            if (string.equals("3"))
-                createNewSpeedelec();
-
-            if (string.equals("4"))
-                createNewEBike();
-
-            if (string.equals("5"))
-                findFirstBikeOfParticularBrand();
-
-            if (string.equals("6"))
-                saveDataToFile();
-
-            if (string.equals("7")) {
-                scanner.close();
-                break;
-            }
+        String pointOfMenu = waitForStringInput(true);
+        //while (true) {
+        if (pointOfMenu.equals("1")) {
+            displayEcoBikeCatalog();
+            //break;
         }
 
+        if (pointOfMenu.equals("2")) {
+            createNewFoldingBike();
+            //break;
+        }
+
+        if (pointOfMenu.equals("3")) {
+            createNewSpeedelec();
+            //break;
+        }
+
+        if (pointOfMenu.equals("4")) {
+            createNewEBike();
+            // break;
+        }
+
+        if (pointOfMenu.equals("5")) {
+            findFirstBikeOfParticularBrand();
+            //break;
+        }
+
+        if (pointOfMenu.equals("6")) {
+            saveDataToFile();
+            //break;
+        }
+
+        if (pointOfMenu.equals("7")) {
+            boolean isStop = stopProgram();
+            //if (!isStop)
+            // break;
+        }
     }
 
+    // }
+
+    public String waitForStringInput(boolean isRequired) {
+        Scanner scanner = new Scanner(System.in);
+        String userInput = null;
+
+        if (isRequired) {
+            try {
+                userInput = scanner.nextLine();
+                while (userInput.isEmpty()) {
+                    System.out.println("Cannot be empty");
+                    userInput = scanner.nextLine();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return userInput;
+    }
+
+    public Integer waitForIntegerInput(boolean isRequired) {
+        Scanner scanner = new Scanner(System.in);
+        Integer userInput = 0;
+
+        if (isRequired) {
+            do {
+                try {
+
+                    userInput = scanner.nextInt();
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                System.out.println("Please enter positive number");
+                scanner.nextLine();
+
+            } while (userInput <= 0);
+        } else if (!isRequired){
+            do {
+                try {
+
+                    userInput = scanner.nextInt();
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                System.out.println("Please enter positive number or 0");
+                scanner.nextLine();
+
+            } while (userInput < 0);
+        }
+
+        return userInput;
+    }
+
+
+    /**
+     * Converting String from file to Entity
+     *
+     * @param entity String from ecobike.txt file which equals one line
+     * @return EcoBikeEntity of some of 3 type
+     */
     public <T> T convertFileContentToEntity(String entity) {
         EcoBikeEntity ecoBikeEntity = null;
 
@@ -117,6 +199,11 @@ public class ConsoleInterface {
 
     }
 
+    /**
+     * Method which sorting all entities by the brand
+     *
+     * @return Sorted list of entities
+     */
     public List<EcoBikeEntity> getSortedArrayOfBikes() {
         List<EcoBikeEntity> bikesArray = new ArrayList<>();
         try {
@@ -128,17 +215,15 @@ public class ConsoleInterface {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Collections.sort(bikesArray, EcoBikeEntity.compareByBrand);
-//        for (EcoBikeEntity q:bikesArray) {
-//            System.out.println(q.toString());
-//
-//        }
+        bikesArray.sort(EcoBikeEntity.compareByBrand);
 
 
         return bikesArray;
     }
 
-
+    /**
+     * Equals to 1 point of display and showing entire catalog
+     */
     public void displayEcoBikeCatalog() {
 
         try {
@@ -190,10 +275,15 @@ public class ConsoleInterface {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        displayMainMenu();
     }
 
+    /**
+     * Corresponds to second point of menu
+     * Creating new entity of Folding Bike
+     */
     public void createNewFoldingBike() {
-        Scanner scanner = new Scanner(System.in);
+        // Scanner scanner = new Scanner(System.in);
         FoldingBike foldingBike = new FoldingBike();
         int sizeOfWheels = 0;
         int numberOfGears = 0;
@@ -201,60 +291,29 @@ public class ConsoleInterface {
         int price = 0;
 
         System.out.println("Please enter the brand of the bike");
-        String brandName = null;
-        try {
-            brandName = scanner.nextLine();
-            while (brandName.isEmpty()) {
-                System.out.println("Brand cannot be empty");
-                brandName = scanner.nextLine();
-            }
-            foldingBike.setBrand(brandName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String brandName = waitForStringInput(true);
+        foldingBike.setBrand(brandName);
+
 
         System.out.println("Please enter the size of wheels (in inch). It can be only positive number");
-        do {
-            try {
-                sizeOfWheels = scanner.nextInt();
-                foldingBike.setSizeOfWheels(sizeOfWheels);
+        sizeOfWheels = waitForIntegerInput(true);
+        foldingBike.setSizeOfWheels(sizeOfWheels);
 
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (sizeOfWheels <= 0);
 
         System.out.println("Please enter the number of gears. It can be only positive number");
-        do {
-            try {
+        numberOfGears = waitForIntegerInput(true);
+        foldingBike.setNumberOfGears(numberOfGears);
 
-                numberOfGears = scanner.nextInt();
-                foldingBike.setNumberOfGears(numberOfGears);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (numberOfGears <= 0);
 
         System.out.println("Please enter the weight of bike. It can be only positive number");
-        do {
-            try {
-
-                weight = scanner.nextInt();
-                foldingBike.setWeight(weight);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (weight <= 0);
+        weight = waitForIntegerInput(true);
 
 
         System.out.println("Please enter is lights on bike is available, type 1 if it's available or type 2 if it's not available");
-        int isLightsAvailable = scanner.nextInt();
+        int isLightsAvailable = waitForIntegerInput(true);
         while (isLightsAvailable != 1 && isLightsAvailable != 2) {
             System.out.println("Please type 1 if lights on bike is available or type 2 if lights on bike is NOT available");
-            isLightsAvailable = scanner.nextInt();
+            isLightsAvailable = waitForIntegerInput(true);
         }
         if (isLightsAvailable == 1) {
             foldingBike.setAvailableForLights(true);
@@ -263,30 +322,21 @@ public class ConsoleInterface {
         }
 
         System.out.println("Please enter the color of bike");
-        String color = scanner.nextLine();
-        while (color.isEmpty()) {
-            System.out.println("Color cannot be empty");
-            color = scanner.nextLine();
-        }
+
+        String color = waitForStringInput(true);
         foldingBike.setColor(color);
 
         System.out.println("Please enter the price of bike (in euros). It can be only positive number");
-        do {
-            try {
-
-                price = scanner.nextInt();
-                foldingBike.setPrice(price);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (price <= 0);
+        price = waitForIntegerInput(true);
+        foldingBike.setPrice(price);
         ecoBikeEntity = foldingBike;
-        display();
-
-
+        displayMainMenu();
     }
 
+    /**
+     * Corresponds to 3 point of menu
+     * Creating new entity of Speedelec
+     */
     public void createNewSpeedelec() {
         Scanner scanner = new Scanner(System.in);
         Speedelec speedelec = new Speedelec();
@@ -296,95 +346,54 @@ public class ConsoleInterface {
         int price = 0;
 
         System.out.println("Please enter the brand of the bike");
-        String brandName = null;
-        try {
-            brandName = scanner.nextLine();
-            while (brandName.isEmpty()) {
-                System.out.println("Brand cannot be empty");
-                brandName = scanner.nextLine();
-            }
-            speedelec.setBrand(brandName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String brandName = waitForStringInput(true);
+        speedelec.setBrand(brandName);
+
 
         System.out.println("Please enter the maximum speed (in km/h). It can be only positive number");
-        do {
-            try {
-                maxSpeed = scanner.nextInt();
-                speedelec.setMaxSpeed(maxSpeed);
-
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (maxSpeed <= 0);
+        maxSpeed = waitForIntegerInput(true);
+        speedelec.setMaxSpeed(maxSpeed);
 
 
         System.out.println("Please enter the weight of bike. It can be only positive number");
-        do {
-            try {
-
-                weight = scanner.nextInt();
-                speedelec.setWeight(weight);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (weight <= 0);
+        weight = waitForIntegerInput(true);
+        speedelec.setWeight(weight);
 
 
         System.out.println("Please enter is lights on bike is available, type 1 if it's available or type 2 if it's not available");
-        int isLightsAvailable = scanner.nextInt();
+        int isLightsAvailable = waitForIntegerInput(true);
         while (isLightsAvailable != 1 && isLightsAvailable != 2) {
             System.out.println("Please type 1 if lights on bike is available or type 2 if lights on bike is NOT available");
             isLightsAvailable = scanner.nextInt();
         }
         if (isLightsAvailable == 1) {
             speedelec.setAvailableForLights(true);
-        } else if (isLightsAvailable == 2) {
+        } else {
             speedelec.setAvailableForLights(false);
         }
 
         System.out.println("Please enter the battery capacity. It can be only positive number");
-        do {
-            try {
-
-                batteryCapacity = scanner.nextInt();
-                speedelec.setBatteryCapacity(batteryCapacity);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (batteryCapacity <= 0);
+        batteryCapacity = waitForIntegerInput(true);
+        speedelec.setBatteryCapacity(batteryCapacity);
 
         System.out.println("Please enter the color of bike");
-        String color = scanner.nextLine();
-        while (color.isEmpty()) {
-            System.out.println("Color cannot be empty");
-            color = scanner.nextLine();
-        }
+
+        String color = waitForStringInput(true);
         speedelec.setColor(color);
 
         System.out.println("Please enter the price of bike (in euros). It can be only positive number");
-        do {
-            try {
-
-                price = scanner.nextInt();
-                speedelec.setPrice(price);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (price <= 0);
+        price = waitForIntegerInput(true);
+        speedelec.setPrice(price);
 
         ecoBikeEntity = speedelec;
-        display();
+        displayMainMenu();
 
     }
 
-
-
+    /**
+     * Corresponds to 4 point of menu
+     * Creating new entity of E-Bike
+     */
     public void createNewEBike() {
         Scanner scanner = new Scanner(System.in);
         EBike eBike = new EBike();
@@ -394,196 +403,532 @@ public class ConsoleInterface {
         int price = 0;
 
         System.out.println("Please enter the brand of the bike");
-        String brandName = null;
-        try {
-            brandName = scanner.nextLine();
-            while (brandName.isEmpty()) {
-                System.out.println("Brand cannot be empty");
-                brandName = scanner.nextLine();
-            }
-            eBike.setBrand(brandName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String brandName = waitForStringInput(true);
+        eBike.setBrand(brandName);
+
 
         System.out.println("Please enter the maximum speed (in km/h). It can be only positive number");
-        do {
-            try {
-                maxSpeed = scanner.nextInt();
-                eBike.setMaxSpeed(maxSpeed);
-
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (maxSpeed <= 0);
+        maxSpeed = waitForIntegerInput(true);
+        eBike.setMaxSpeed(maxSpeed);
 
 
         System.out.println("Please enter the weight of bike. It can be only positive number");
-        do {
-            try {
-
-                weight = scanner.nextInt();
-                eBike.setWeight(weight);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (weight <= 0);
+        weight = waitForIntegerInput(true);
+        eBike.setWeight(weight);
 
 
         System.out.println("Please enter is lights on bike is available, type 1 if it's available or type 2 if it's not available");
-        int isLightsAvailable = scanner.nextInt();
+        int isLightsAvailable = waitForIntegerInput(true);
         while (isLightsAvailable != 1 && isLightsAvailable != 2) {
             System.out.println("Please type 1 if lights on bike is available or type 2 if lights on bike is NOT available");
             isLightsAvailable = scanner.nextInt();
         }
         if (isLightsAvailable == 1) {
             eBike.setAvailableForLights(true);
-        } else if (isLightsAvailable == 2) {
+        } else {
             eBike.setAvailableForLights(false);
         }
 
         System.out.println("Please enter the battery capacity. It can be only positive number");
-        do {
-            try {
 
-                batteryCapacity = scanner.nextInt();
-                eBike.setBatteryCapacity(batteryCapacity);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (batteryCapacity <= 0);
+        batteryCapacity = waitForIntegerInput(true);
+        eBike.setBatteryCapacity(batteryCapacity);
+
 
         System.out.println("Please enter the color of bike");
-        String color = scanner.nextLine();
-        while (color.isEmpty()) {
-            System.out.println("Color cannot be empty");
-            color = scanner.nextLine();
-        }
+
+        String color = waitForStringInput(true);
         eBike.setColor(color);
 
         System.out.println("Please enter the price of bike (in euros). It can be only positive number");
-        do {
-            try {
+        price = waitForIntegerInput(true);
+        eBike.setPrice(price);
 
-                price = scanner.nextInt();
-                eBike.setPrice(price);
-            } catch (Exception e) {
-                System.out.println("Please enter an integer");
-            }
-            scanner.nextLine();
-        } while (price <= 0);
         ecoBikeEntity = eBike;
-        display();
+
+        displayMainMenu();
 
     }
 
+    /**
+     * Corresponds to 5 point of menu
+     * Find the first entity of particular brand in according to searching filters
+     */
     public void findFirstBikeOfParticularBrand() {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Scanner scanner = new Scanner(System.in);
+        SortingThread thread = new SortingThread();
+        thread.start();
 
-        EcoBikeEntity ecoBikeEntity;
-        int typeOfBike = 0;
         List<? extends EcoBikeEntity> bikesArray = getSortedArrayOfBikes();
+        EcoBikeEntity ecoBikeEntity;
+        int typeOfBike;
 
 
-        do {
-            try {
-                System.out.println("Please select the type of bike:\n"+
-                        "1 - E-Bike\n"+
-                        "2 - Folding Bike\n"+
-                        "3 - Speedelec\n");
-                typeOfBike = scanner.nextInt();
-                if (typeOfBike==1) {
+        System.out.println("Please select the type of bike:\n" +
+                "1 - E-Bike\n" +
+                "2 - Folding Bike\n" +
+                "3 - Speedelec\n");
+        typeOfBike = waitForIntegerInput(true);
+        if (typeOfBike == 1) {
+            ecoBikeEntity = new EBike();
+            int maxSpeed = -1;
+            int weight = -1;
+            int isAvailableForLights = -1;
+            int batteryCapacity = -1;
+            int price = -1;
 
-
-                    System.out.println("Please enter the brand of a bike");
-                    ecoBikeEntity = new EBike();
-                    String bra = scanner.nextLine();
-
-                    ecoBikeEntity.setBrand(bra);
-
-                    System.out.println("Please enter the maximum speed of a bike");
-                    //Integer q = Integer.parseInt(reader.readLine());
-                    ((EBike)ecoBikeEntity).setMaxSpeed(Integer.parseInt(reader.readLine()));
-
-                    System.out.println("Please enter the weight of a bike");
-                    ecoBikeEntity.setWeight(scanner.nextInt());
-
-                    System.out.println("Please enter is lights available on bike\n"
-                            +"type true if it's available\n"
-                            +"type false if it's not available");
-                    ecoBikeEntity.setAvailableForLights(scanner.nextBoolean());
-
-                    System.out.println("Please enter the battery capacity");
-                    ((EBike) ecoBikeEntity).setBatteryCapacity(scanner.nextInt());
-
-                    System.out.println("Please enter the color");
-                    String color = scanner.nextLine();
-                    String color1 =scanner.nextLine();
-                    ecoBikeEntity.setColor(color1);
-
-                    System.out.println("Please enter the price of a bike");
-                    ecoBikeEntity.setPrice(scanner.nextInt());
-
-                    EBike finalEcoBikeEntity = (EBike) ecoBikeEntity;
-                    bikesArray = bikesArray.stream().filter(b->b.getBrand().
-                            equals(finalEcoBikeEntity.getBrand())).
-                            collect(Collectors.toList());
-
-                    if (finalEcoBikeEntity.getMaxSpeed()!=null){
-                        bikesArray = bikesArray.stream().filter(b->((EBike)b).getMaxSpeed().
-                                equals(finalEcoBikeEntity.getMaxSpeed())).
-                                collect(Collectors.toList());
-                    }
-                    if (finalEcoBikeEntity.getWeight()!=null){
-                        bikesArray = bikesArray.stream().filter(b->b.getWeight().
-                                equals(finalEcoBikeEntity.getWeight())).
-                                collect(Collectors.toList());
-                    }
-                    if (finalEcoBikeEntity.isAvailableForLights()!=null){
-                        bikesArray = bikesArray.stream().filter(b->b.isAvailableForLights().
-                                equals(finalEcoBikeEntity.isAvailableForLights())).
-                                collect(Collectors.toList());
-                    }
-                    if (finalEcoBikeEntity.getBatteryCapacity()!=null){
-                        bikesArray = bikesArray.stream().filter(b -> ((EBike)b).getBatteryCapacity().
-                                equals(finalEcoBikeEntity.getBatteryCapacity())).
-                                collect(Collectors.toList());
-                    }
-                    if (finalEcoBikeEntity.getColor()!=null){
-                        bikesArray = bikesArray.stream().filter(b -> b.getColor().
-                                equals(finalEcoBikeEntity.getColor())).
-                                collect(Collectors.toList());
-                    }
-                    if (finalEcoBikeEntity.getPrice()!=null){
-                        bikesArray = bikesArray.stream().filter(b->b.getPrice().
-                                equals(finalEcoBikeEntity.getPrice())).
-                                collect(Collectors.toList());
-                    }
-                    System.out.println(bikesArray.stream().findAny().isPresent());
-                    System.out.println(bikesArray.stream().findFirst());
-
-                }
-                else if (typeOfBike==2) {
-                    ecoBikeEntity = new FoldingBike();
-                }
-                else if (typeOfBike==3){
-                    ecoBikeEntity = new Speedelec();
-                }
-                //typeOfBike = scanner.nextInt();
-
-            } catch (Exception e) {
-                System.out.println("EXCEPTION" +
-                        "\nPlease enter an integer");
-            }
+            System.out.println("Please enter the brand of a bike");
             scanner.nextLine();
-        } while (typeOfBike <= 0);
+            String brand = waitForStringInput(false);
+            ecoBikeEntity.setBrand(brand);
 
+            System.out.println("Please enter the maximum speed of a bike. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            maxSpeed = waitForIntegerInput(false);
+            if (maxSpeed != 0)
+                ((EBike) ecoBikeEntity).setMaxSpeed(maxSpeed);
+            else
+                ((EBike) ecoBikeEntity).setMaxSpeed(null);
+
+
+            System.out.println("Please enter the weight of a bike. Can be only a positive number\n"
+
+                    + "Type 0 if u want to skip this parameter");
+
+            weight = waitForIntegerInput(false);
+            if (weight != 0)
+                ecoBikeEntity.setWeight(weight);
+            else
+                ecoBikeEntity.setWeight(null);
+
+
+            System.out.println("Please enter is lights available on bike"
+                    + "type 1 if it's available\n"
+                    + "type 2 if it's not available\n"
+                    + "type 0 if you want to skip this parameter");
+
+            isAvailableForLights = waitForIntegerInput(false);
+            if (isAvailableForLights == 1)
+                ecoBikeEntity.setAvailableForLights(true);
+            else if (isAvailableForLights == 2)
+                ecoBikeEntity.setAvailableForLights(false);
+            else if (isAvailableForLights == 0)
+                ecoBikeEntity.setAvailableForLights(null);
+
+
+            System.out.println("Please enter the battery capacity. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            batteryCapacity = waitForIntegerInput(false);
+            if (batteryCapacity != 0)
+                ((EBike) ecoBikeEntity).setBatteryCapacity(batteryCapacity);
+            else
+                ((EBike) ecoBikeEntity).setBatteryCapacity(null);
+
+
+            System.out.println("Please enter the color\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            String color = waitForStringInput(false);
+            if (!color.equals("0"))
+                ecoBikeEntity.setColor(color);
+            else
+                ecoBikeEntity.setColor(null);
+
+            System.out.println("Please enter the price of a bike. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            price = waitForIntegerInput(false);
+            if (price != 0)
+                ecoBikeEntity.setPrice(price);
+            else
+                ecoBikeEntity.setPrice(null);
+
+
+            if (!thread.isInterrupted()) {
+                System.out.println("Waiting while bikes are sorting");
+                try {
+                    thread.join();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            EBike finalEcoBikeEntity = (EBike) ecoBikeEntity;
+            bikesArray = bikesArray.stream().filter(b -> b.getBrand().
+                    equals(finalEcoBikeEntity.getBrand())).
+                    collect(Collectors.toList());
+
+            if (finalEcoBikeEntity.getMaxSpeed() != null) {
+                bikesArray = bikesArray.stream().filter(b -> ((EBike) b).getMaxSpeed().
+                        equals(finalEcoBikeEntity.getMaxSpeed())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getWeight() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getWeight().
+                        equals(finalEcoBikeEntity.getWeight())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.isAvailableForLights() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.isAvailableForLights().
+                        equals(finalEcoBikeEntity.isAvailableForLights())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getBatteryCapacity() != null) {
+                bikesArray = bikesArray.stream().filter(b -> ((EBike) b).getBatteryCapacity().
+                        equals(finalEcoBikeEntity.getBatteryCapacity())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getColor() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getColor().
+                        equals(finalEcoBikeEntity.getColor())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getPrice() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getPrice().
+                        equals(finalEcoBikeEntity.getPrice())).
+                        collect(Collectors.toList());
+            }
+            boolean isPresent = bikesArray.stream().findFirst().isPresent();
+            System.out.println(isPresent);
+            if (isPresent) {
+                System.out.println(bikesArray.stream().findFirst().get());
+            } else {
+                System.out.println("No bikes found by the provided parameters");
+            }
+
+
+        } else if (typeOfBike == 2) {
+            ecoBikeEntity = new FoldingBike();
+            int sizeOfWheels = -1;
+            int weight = -1;
+            int isAvailableForLights = -1;
+            int numberOfGears = -1;
+            int price = -1;
+
+            System.out.println("Please enter the brand of a bike");
+            scanner.nextLine();
+            String brand = scanner.nextLine();
+            while (brand.isEmpty()) {
+                System.out.println("Brand cannot be empty");
+                brand = scanner.nextLine();
+            }
+            ecoBikeEntity.setBrand(brand);
+
+            System.out.println("Please enter the size of wheels. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+
+                    sizeOfWheels = scanner.nextInt();
+                    if (sizeOfWheels != 0)
+                        ((FoldingBike) ecoBikeEntity).setSizeOfWheels(sizeOfWheels);
+                    else
+                        ((FoldingBike) ecoBikeEntity).setSizeOfWheels(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (sizeOfWheels < 0);
+
+            System.out.println("Please enter the number of gears capacity. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+
+                    numberOfGears = scanner.nextInt();
+                    if (numberOfGears != 0)
+                        ((FoldingBike) ecoBikeEntity).setNumberOfGears(numberOfGears);
+                    else
+                        ((FoldingBike) ecoBikeEntity).setNumberOfGears(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (numberOfGears < 0);
+
+            System.out.println("Please enter the weight of a bike. Can be only a positive number\n"
+
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+
+                    weight = scanner.nextInt();
+                    if (weight != 0)
+                        ecoBikeEntity.setWeight(weight);
+                    else
+                        ecoBikeEntity.setWeight(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (weight < 0);
+
+            System.out.println("Please enter is lights available on bike"
+                    + "type 1 if it's available\n"
+                    + "type 2 if it's not available\n"
+                    + "type 0 if you want to skip this parameter");
+            do {
+                try {
+                    isAvailableForLights = scanner.nextInt();
+                    if (isAvailableForLights == 1)
+                        ecoBikeEntity.setAvailableForLights(true);
+                    else if (isAvailableForLights == 2)
+                        ecoBikeEntity.setAvailableForLights(false);
+                    else if (isAvailableForLights == 0)
+                        ecoBikeEntity.setAvailableForLights(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (isAvailableForLights < 0);
+
+            System.out.println("Please enter the color\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            String color = scanner.nextLine();
+            if (!color.equals("0"))
+                ecoBikeEntity.setColor(color);
+            else
+                ecoBikeEntity.setColor(null);
+
+            System.out.println("Please enter the price of a bike. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+                    price = scanner.nextInt();
+                    if (price != 0)
+                        ecoBikeEntity.setPrice(price);
+                    else
+                        ecoBikeEntity.setPrice(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (price < 0);
+
+            if (!thread.isInterrupted()) {
+                System.out.println("Waiting while bikes are sorting");
+                try {
+                    thread.join();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            FoldingBike finalEcoBikeEntity = (FoldingBike) ecoBikeEntity;
+            bikesArray = bikesArray.stream().filter(b -> b.getBrand().
+                    equals(finalEcoBikeEntity.getBrand())).
+                    collect(Collectors.toList());
+
+            if (finalEcoBikeEntity.getSizeOfWheels() != null) {
+                bikesArray = bikesArray.stream().filter(b -> ((FoldingBike) b).getSizeOfWheels().
+                        equals(finalEcoBikeEntity.getSizeOfWheels())).
+                        collect(Collectors.toList());
+
+            }
+            if (finalEcoBikeEntity.getNumberOfGears() != null) {
+                bikesArray = bikesArray.stream().filter(b -> ((FoldingBike) b).getNumberOfGears().
+                        equals(finalEcoBikeEntity.getNumberOfGears())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getWeight() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getWeight().
+                        equals(finalEcoBikeEntity.getWeight())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.isAvailableForLights() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.isAvailableForLights().
+                        equals(finalEcoBikeEntity.isAvailableForLights())).
+                        collect(Collectors.toList());
+            }
+
+            if (finalEcoBikeEntity.getColor() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getColor().
+                        equals(finalEcoBikeEntity.getColor())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getPrice() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getPrice().
+                        equals(finalEcoBikeEntity.getPrice())).
+                        collect(Collectors.toList());
+            }
+            boolean isPresent = bikesArray.stream().findFirst().isPresent();
+            if (isPresent) {
+                System.out.println(bikesArray.stream().findFirst().get());
+            } else {
+                System.out.println("No bikes found by the provided parameters");
+            }
+
+
+        } else if (typeOfBike == 3) {
+            ecoBikeEntity = new Speedelec();
+            int maxSpeed = -1;
+            int weight = -1;
+            int isAvailableForLights = -1;
+            int batteryCapacity = -1;
+            int price = -1;
+
+            System.out.println("Please enter the brand of a bike");
+            scanner.nextLine();
+            String brand = scanner.nextLine();
+            while (brand.isEmpty()) {
+                System.out.println("Brand cannot be empty");
+                brand = scanner.nextLine();
+            }
+            ecoBikeEntity.setBrand(brand);
+
+            System.out.println("Please enter the maximum speed of a bike. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            do {
+                try {
+                    maxSpeed = scanner.nextInt();
+                    if (maxSpeed != 0)
+                        ((Speedelec) ecoBikeEntity).setMaxSpeed(maxSpeed);
+                    else
+                        ((Speedelec) ecoBikeEntity).setMaxSpeed(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (maxSpeed < 0);
+
+            System.out.println("Please enter the weight of a bike. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+                    weight = scanner.nextInt();
+                    if (weight != 0)
+                        ecoBikeEntity.setWeight(weight);
+                    else
+                        ecoBikeEntity.setWeight(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (weight < 0);
+
+            System.out.println("Please enter is lights available on bike\n"
+                    + "type 1 if it's available\n"
+                    + "type 2 if it's not available\n"
+                    + "type 0 if you want to skip this parameter");
+            do {
+                try {
+                    isAvailableForLights = scanner.nextInt();
+                    if (isAvailableForLights == 1)
+                        ecoBikeEntity.setAvailableForLights(true);
+                    else if (isAvailableForLights == 2)
+                        ecoBikeEntity.setAvailableForLights(false);
+                    else if (isAvailableForLights == 0)
+                        ecoBikeEntity.setAvailableForLights(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (isAvailableForLights < 0);
+
+            System.out.println("Please enter the battery capacity. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+                    batteryCapacity = scanner.nextInt();
+                    if (batteryCapacity != 0)
+                        ((Speedelec) ecoBikeEntity).setBatteryCapacity(batteryCapacity);
+                    else
+                        ((Speedelec) ecoBikeEntity).setBatteryCapacity(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (batteryCapacity < 0);
+
+            System.out.println("Please enter the color. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+
+            String color = scanner.nextLine();
+            if (!color.equals("0"))
+                ecoBikeEntity.setColor(color);
+            else
+                ecoBikeEntity.setColor(null);
+
+            System.out.println("Please enter the price of a bike. Can be only a positive number\n"
+                    + "Type 0 if u want to skip this parameter");
+            do {
+                try {
+                    price = scanner.nextInt();
+                    if (price != 0)
+                        ecoBikeEntity.setPrice(price);
+                    else
+                        ecoBikeEntity.setPrice(null);
+                } catch (Exception e) {
+                    System.out.println("Please enter an integer");
+                }
+                scanner.nextLine();
+            } while (price < 0);
+
+            if (!thread.isInterrupted()) {
+                System.out.println("Waiting while bikes are sorting");
+                try {
+                    thread.join();
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            Speedelec finalEcoBikeEntity = (Speedelec) ecoBikeEntity;
+
+            bikesArray = bikesArray.stream().filter(b -> b.getBrand().
+                    equals(finalEcoBikeEntity.getBrand())).
+                    collect(Collectors.toList());
+
+            if (finalEcoBikeEntity.getMaxSpeed() != null) {
+                bikesArray = bikesArray.stream().filter(b -> ((Speedelec) b).getMaxSpeed().
+                        equals(finalEcoBikeEntity.getMaxSpeed())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getWeight() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getWeight().
+                        equals(finalEcoBikeEntity.getWeight())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.isAvailableForLights() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.isAvailableForLights().
+                        equals(finalEcoBikeEntity.isAvailableForLights())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getBatteryCapacity() != null) {
+                bikesArray = bikesArray.stream().filter(b -> ((Speedelec) b).getBatteryCapacity().
+                        equals(finalEcoBikeEntity.getBatteryCapacity())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getColor() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getColor().
+                        equals(finalEcoBikeEntity.getColor())).
+                        collect(Collectors.toList());
+            }
+            if (finalEcoBikeEntity.getPrice() != null) {
+                bikesArray = bikesArray.stream().filter(b -> b.getPrice().
+                        equals(finalEcoBikeEntity.getPrice())).
+                        collect(Collectors.toList());
+            }
+            boolean isPresent = bikesArray.stream().findFirst().isPresent();
+            if (isPresent) {
+                System.out.println(bikesArray.stream().findFirst().get());
+            } else {
+                System.out.println("No bikes found by the provided parameters");
+            }
+
+        }
+
+
+        displayMainMenu();
     }
 
+    /**
+     * Corresponds to 6 point of menu
+     * Save inserted from point 2, 3 or 4 to file
+     */
     public void saveDataToFile() {
 
         try {
@@ -596,12 +941,30 @@ public class ConsoleInterface {
                 writer.newLine();
                 writer.close();
                 System.out.println("Bike has been successfully added\n");
+                ecoBikeEntity = null;
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            display();
+            displayMainMenu();
         }
     }
 
+    public boolean stopProgram() {
+        Scanner scanner = new Scanner(System.in);
+        if (ecoBikeEntity != null) {
+            System.out.println("Warning, you have unsaved data\n" + "Do you want to save unsaved data? (y/n)");
+
+            String isSave = scanner.nextLine();
+            if (isSave.equals("y") || isSave.equals("Y")) {
+                saveDataToFile();
+
+
+            } else if (isSave.equals("n") || isSave.equals("N")) {
+
+                return false;
+            }
+        }
+        return false;
+    }
 }
