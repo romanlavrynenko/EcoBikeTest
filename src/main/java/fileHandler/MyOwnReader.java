@@ -9,12 +9,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class MyOwnReader {
-    private BufferedReader reader;
     private File file;
-//
-//    public MyOwnReader(File file) {
-//        this.file = file;
-//    }
+
+    public MyOwnReader(File file) {
+        this.file = file;
+    }
 
     public MyOwnReader() {
     }
@@ -36,8 +35,12 @@ public class MyOwnReader {
         return array;
     }
 
-    public void getFileNameFromUser(File userFile) {
+    public void getFileNameFromUser() {
         Scanner user = new Scanner(System.in);
+
+        System.out.println("Please enter filename");
+        String fileName = user.nextLine().trim();
+        File userFile = new File(fileName);
 
         while (!userFile.exists()) {
             System.out.println("Invalid file name, please enter correct file name");

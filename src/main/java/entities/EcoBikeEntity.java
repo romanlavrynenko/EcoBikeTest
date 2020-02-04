@@ -21,23 +21,6 @@ public abstract class EcoBikeEntity {
         this.price = price;
     }
 
-    /**
-     * Compares all fields of Entities
-     *
-     * @param o its Object EcoBikeEntity which compare with another EcoBikeEntity
-     * @return true if it's equals and false if it's not
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        EcoBikeEntity that = (EcoBikeEntity) o;
-        return weight == that.weight &&
-                isAvailableForLights == that.isAvailableForLights &&
-                price == that.price &&
-                brand.equals(that.brand) &&
-                color.equals(that.color);
-    }
 
     public static Comparator<EcoBikeEntity> compareByBrand = new Comparator<EcoBikeEntity>() {
 
@@ -49,6 +32,40 @@ public abstract class EcoBikeEntity {
 
         }
     };
+
+    /**
+     * Compares all fields of Entities
+     *
+     * @param o its Object EcoBikeEntity which compare with another EcoBikeEntity
+     * @return true if it's equals and false if it's not
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EcoBikeEntity that = (EcoBikeEntity) o;
+        if (brand == null) {
+
+            return weight == that.weight &&
+                    isAvailableForLights == that.isAvailableForLights &&
+                    price == that.price &&
+                    null == that.brand &&
+                    color.equals(that.color);
+        } else if (color == null) {
+
+            return weight == that.weight &&
+                    isAvailableForLights == that.isAvailableForLights &&
+                    price == that.price &&
+                    brand.equals(that.brand) &&
+                    null == that.color;
+        }
+
+        return weight == that.weight &&
+                isAvailableForLights == that.isAvailableForLights &&
+                price == that.price &&
+                brand.equals(that.brand) &&
+                color.equals(that.color);
+    }
 
     @Override
     public int hashCode() {

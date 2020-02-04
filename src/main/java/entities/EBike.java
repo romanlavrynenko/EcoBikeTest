@@ -12,7 +12,7 @@ public class EBike extends EcoBikeEntity {
     }
 
     public EBike(String brand, Integer maxSpeed, Integer weight, Boolean isAvailableForLights,
-                 Integer batteryCapacity, String color, Integer price) {
+                     Integer batteryCapacity, String color, Integer price) {
         super(brand, weight, isAvailableForLights, color, price);
         this.type = "E-BIKE";
         this.maxSpeed = maxSpeed;
